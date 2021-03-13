@@ -23,7 +23,13 @@ Page 5 of the secure hash standard.
 #define SIG1(x) ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25)
 #define Sig0(x) ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3)
 #define Sig1(x) ROTR(x, 17) ^ ROTR(x, 19) ^ SHR(x, 10)
-
+/*
+Section 4.2.2
+SHA-224 and SHA-256 use the same sequence of sixty-four constant 32-bit words,
+{ 2 5 6} { 2 5 6} { 2 5 6}
+K0 , K1 ,, K63 . These words represent the first thirty-two bits of the fractional parts of
+the cube roots of the first sixty-four prime numbers. In hex, these constant words are (from left to right)
+*/
 const WORD K[] = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 
     0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 
@@ -41,6 +47,15 @@ const WORD K[] = {
     0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0x67178f2
+};
+/* 
+Section 5.3.4
+For SHA-256, the initial hash value, H , shall consist of the following eight 32-bit words, in Hex 
+*/ 
+WORD H[] = {
+0X6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+0x510e527f,0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+
 };
 
 

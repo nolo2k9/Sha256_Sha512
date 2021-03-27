@@ -4,6 +4,7 @@
 #define W 32
 #define WORD uint32_t
 #define PF PRIX32
+
 /* 
 Page 5 and 10 of the secure hash standard.
 Pre processor directive.

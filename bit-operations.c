@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
     {
         printf("%s\n", argv[i]);
     }
-    printf("%d\n", argc);
-    return 0;
+    //printf("%d\n", argc);
+    //return 0;
 
     printf("\n");
     //set i to a literal value

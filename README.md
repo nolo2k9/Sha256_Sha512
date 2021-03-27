@@ -1,5 +1,6 @@
 # Theory_of_algorithms_project_2021
 
+# References
 # Secure hash standard:
 https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
@@ -8,6 +9,15 @@ https://stackoverflow.com/questions/30037808/multiline-editing-in-visual-studio-
 
 # Bitwise operations
 https://en.wikipedia.org/wiki/Bitwise_operations_in_C
+
+# Bitwise operators in C Programming
+https://www.programiz.com/c-programming/bitwise-operators
+
+# Declare 64 bit integers in C
+https://stackoverflow.com/questions/9606455/how-to-specify-64-bit-integers-in-c
+
+# Multi-line editing vscode
+https://kencenerelli.wordpress.com/2018/03/25/visual-studio-code-multi-line-and-multi-cursor-editing/
 
 
 

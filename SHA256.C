@@ -1,28 +1,78 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#define WLEN 32
+#ifdef _MSC_VER
+
+#include <stdlib.h>
+#define bswap_32(x) _byteswap_ulong(x)
+#define bswap_64(x) _byteswap_uint64(x)
+
+#elif defined(__APPLE__)
+
+// Mac OS X / Darwin features
+#include <libkern/OSByteOrder.h>
+#define bswap_32(x) OSSwapInt32(x)
+#define bswap_64(x) OSSwapInt64(x)
+
+#elif defined(__sun) || defined(sun)
+
+#include <sys/byteorder.h>
+#define bswap_32(x) BSWAP_32(x)
+#define bswap_64(x) BSWAP_64(x)
+
+#elif defined(__FreeBSD__)
+
+#include <sys/endian.h>
+#define bswap_32(x) bswap32(x)
+#define bswap_64(x) bswap64(x)
+
+#elif defined(__OpenBSD__)
+
+#include <sys/types.h>
+#define bswap_32(x) swap32(x)
+#define bswap_64(x) swap64(x)
+
+#elif defined(__NetBSD__)
+
+#include <sys/types.h>
+#include <machine/bswap.h>
+#if defined(__BSWAP_RENAME) && !defined(__bswap_32)
+#define bswap_32(x) bswap32(x)
+#define bswap_64(x) bswap64(x)
+#endif
+
+#else
+
+#include <byteswap.h>
+
+#endif
+
+const int _i = 1;
+#define islilend() ((*(char*)&_i) != 0)
+
+
+// Words and bytes.
 #define WORD uint32_t
-#define PF PRIX32
+#define PF PRIx32
 #define BYTE uint8_t
 
-/* 
-Page 5 and 10 of the secure hash standard.
-Pre processor directive.
-*/
-#define CH(x, y, z) (x & y) ^ (~x & z)
-//Looks for what is the majority of buts between z,y,z
-#define MAJ(x, y, z) (x & y) ^ (x & z) ^ (y & z)
+// Page 5 of the secure hash standard.
+#define ROTL(_x,_n) ((_x << _n) | (_x >> ((sizeof(_x)*8) - _n)))
+#define ROTR(_x,_n) ((_x >> _n) | (_x << ((sizeof(_x)*8) - _n)))
+#define SHR(_x,_n) (_x >> _n)
 
-//Page 10 of the secure hash standard
-#define SIG0(x) ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22)
-#define SIG1(x) ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25)
-#define Sig0(x) ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3)
-#define Sig1(x) ROTR(x, 17) ^ ROTR(x, 19) ^ SHR(x, 10)
+// Page 10 of the secure hash standard.
+#define CH(_x,_y,_z) ((_x & _y) ^ (~_x & _z))
+#define MAJ(_x,_y,_z) ((_x & _y) ^ (_x & _z) ^ (_y & _z))
+
+#define SIG0(_x) (ROTR(_x,2)  ^ ROTR(_x,13) ^ ROTR(_x,22))
+#define SIG1(_x) (ROTR(_x,6)  ^ ROTR(_x,11) ^ ROTR(_x,25))
+#define Sig0(_x) (ROTR(_x,7)  ^ ROTR(_x,18) ^ SHR(_x,3))
+#define Sig1(_x) (ROTR(_x,17) ^ ROTR(_x,19) ^ SHR(_x,10))
+
 
 // SHA256 works on blocks of 512 bits.
-union Block
-{
+union Block {
     // 8 x 64 = 512 - dealing with block as bytes.
     BYTE bytes[64];
     // 32 x 16 = 512 - dealing with block as words.
@@ -32,27 +82,11 @@ union Block
 };
 
 // For keeping track of where we are with the input message/padding.
-enum Status
-{
-    READ,
-    PAD,
-    END
+enum Status {
+    READ, PAD, END
 };
 
-/* 
-Page 5 of the secure hash standard.
-*/
-#define ROTL(x, n) (x << n) | (x >> (WLEN - n))
-#define ROTR(x, n) (x >> n) | (x << (WLEN - n))
-#define SHR(x, n) x >> n
-
-/*
-Section 4.2.2
-SHA-224 and SHA-256 use the same sequence of sixty-four constant 32-bit words,
-{ 2 5 6} { 2 5 6} { 2 5 6}
-K0 , K1 ,, K63 . These words represent the first thirty-two bits of the fractional parts of
-the cube roots of the first sixty-four prime numbers. In hex, these constant words are (from left to right)
-*/
+// Section 4.2.2
 const WORD K[] = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
     0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -69,158 +103,111 @@ const WORD K[] = {
     0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
     0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
-    0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0x67178f2};
+    0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+};
 
 // Returns 1 if it created a new block from original message or padding.
 // Returns 0 if all padded message has already been consumed.
-int next_block(FILE *f, union Block *M, enum Status *S, uint64_t *nobits)
-{
+int next_block(FILE *f, union Block *M, enum Status *S, uint64_t *nobits) {
 
     // Number of bytes read.
     size_t nobytes;
 
-    if (*S == END)
-    {
+    if (*S == END) {
+        // Finish.
         return 0;
-    }
-    else if (*S == READ)
-    {
+    } else if (*S == READ) {
         // Try to read 64 bytes from the input file.
         nobytes = fread(M->bytes, 1, 64, f);
         // Calculate the total bits read so far.
         *nobits = *nobits + (8 * nobytes);
         // Enough room for padding.
-        if (nobytes == 64)
-        {
+        if (nobytes == 64) {
             // This happens when we can read 64 bytes from f.
-            return 1;
-        }
-        else if (nobytes < 56)
-        {
+            // Do nothing.
+        } else if (nobytes < 56) {
             // This happens when we have enough roof for all the padding.
             // Append a 1 bit (and seven 0 bits to make a full byte).
             M->bytes[nobytes] = 0x80; // In bits: 10000000.
             // Append enough 0 bits, leaving 64 at the end.
-            for (nobytes++; nobytes < 56; nobytes++)
-            {
+            for (nobytes++; nobytes < 56; nobytes++) {
                 M->bytes[nobytes] = 0x00; // In bits: 00000000
             }
-            // Append length of original input (CHECK ENDIANESS).
-            M->sixf[7] = *nobits;
+            // Append nobits as a big endian integer.
+            M->sixf[7] = (islilend() ? bswap_64(*nobits) : *nobits);
             // Say this is the last block.
             *S = END;
-        }
-        else
-        {
+        } else {
             // Got to the end of the input message and not enough room
             // in this block for all padding.
             // Append a 1 bit (and seven 0 bits to make a full byte.)
             M->bytes[nobytes] = 0x80;
             // Append 0 bits.
-            for (nobytes++; nobytes < 64; nobytes++)
-            {
-                // Error: trying to write to
+            for (nobytes++; nobytes < 64; nobytes++) {
+                 // Error: trying to write to 
                 M->bytes[nobytes] = 0x00; // In bits: 00000000
             }
             // Change the status to PAD.
             *S = PAD;
         }
-    }
-    else if (*S == PAD)
-    {
+    } else if (*S == PAD) {
         // Append 0 bits.
-        for (nobytes = 0; nobytes < 56; nobytes++)
-        {
+        for (nobytes = 0; nobytes < 56; nobytes++) {
             M->bytes[nobytes] = 0x00; // In bits: 00000000
         }
-        // Append nobits as an integer. CHECK ENDIAN!
-        M->sixf[7] = *nobits;
+        // Append nobits as a big endian integer.
+        M->sixf[7] = (islilend() ? bswap_64(*nobits) : *nobits);
         // Change the status to END.
         *S = END;
     }
 
+    // Swap the byte order of the words if we're little endian.
+    if (islilend())
+        for (int i = 0; i < 16; i++)
+            M->words[i] = bswap_32(M->words[i]);
+
     return 1;
 }
-//Calculate the next has from the current message block
-int next_hash(union Block *M, WORD H[])
-{
-    //Use each previous value to calculate the subsequent
 
-    // Message schedule, section 6.2.2
+
+int next_hash(union Block *M, WORD H[]) {
+  
+    // Message schedule, Section 6.2.2
     WORD W[64];
-
-    //Iterator
+    // Iterator.
     int t;
-
-    //Temporary Variables
+    // Temporary variables.
     WORD a, b, c, d, e, f, g, h, T1, T2;
-    /*
-    Section6.2.2, part 1
-    The SHA-256 hash computation uses functions and constants previously defined in Sec. 4.1.2
-    32 and Sec. 4.2.2, respectively. Addition (+) is performed modulo 2 .
-    (1) (2) (N)
-    Each message block, M , M , ..., M , is processed in order, using the following steps:
-    */
 
+    // Section 6.2.2, part 1.
     for (t = 0; t < 16; t++)
         W[t] = M->words[t];
     for (t = 16; t < 64; t++)
-        //Sig0(x) ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3) Sig1(x) ROTR(x, 17) ^ ROTR(x, 19) ^ SHR(x, 10)
-        W[t] = Sig1(W[t - 2]) + W[t - 7] + Sig0(W[t - 15]) + W[t - 16];
+        W[t] = Sig1(W[t-2]) + W[t-7] + Sig0(W[t-15]) + W[t-16];
 
-    /* 
-        Section 6.2.2, part 2
-        Initialize the eight working variables, a, b, c, d, e, f, g, and h, with the (i-1)st hash value:
-    */
-    a = H[0];
-    b = H[1];
-    c = H[2];
-    d = H[3];
-    e = H[4];
-    f = H[5];
-    g = H[6];
-    h = H[7];
+    // Section 6.2.2, part 2.
+    a = H[0]; b = H[1]; c = H[2]; d = H[3];
+    e = H[4]; f = H[5]; g = H[6]; h = H[7];
 
-    /*
-        Section 6.2.2, Part 3
-        - T Temporary w-bit word used in the hash computation.
-        - w Number of bits in a word.
-        For t=0 to 63:
-    */
-    for (int t = 0; t > 64; t++)
-    {
-        for (t = 0; t < 64; t++)
-        {
-            T1 = h + SIG1(e) + CH(e, f, g) + K[t] + W[t];
-            T2 = SIG0(a) + MAJ(a, b, c);
-            h = g;
-            g = f;
-            f = e;
-            e = d + T1;
-            d = c;
-            c = b;
-            b = a;
-            a = T1 + T2;
-        }
+    // Section 6.2.2, part 3.
+    for (t = 0; t < 64; t++) {
+        T1 = h + SIG1(e) + CH(e, f, g) + K[t] + W[t];
+        T2 = SIG0(a) + MAJ(a, b, c);
+        h = g; g = f; f = e; e = d + T1; d = c; c = b; b = a; a = T1 + T2;
     }
 
-    /*
-        Section 6.2.2, Part 4
-        Compute the ith intermediate hash value H(i):
-    */
+    // Section 6.2.2, part 4.
+    H[0] = a + H[0]; H[1] = b + H[1]; H[2] = c + H[2]; H[3] = d + H[3];
+    H[4] = e + H[4]; H[5] = f + H[5]; H[6] = g + H[6]; H[7] = h + H[7];
 
-    H[0] = a + H[0];
-    H[1] = b + H[1];
-    H[2] = c + H[2];
-    H[3] = d + H[3];
-    H[4] = e + H[4];
-    H[5] = f + H[5];
-    H[6] = g + H[6];
-    H[7] = h + H[7];
+    return 0;
 }
-int sha256(FILE *f, WORD H[])
-{
-    // The function that preforms the sha256 algorithm on message f.
+
+
+int sha256(FILE *f, WORD H[]) {
+    // The function that performs/orchestrates the SHA256 algorithm on
+    // message f.
+
     // The current block.
     union Block M;
 
@@ -231,45 +218,35 @@ int sha256(FILE *f, WORD H[])
     enum Status S = READ;
 
     // Loop through the (preprocessed) blocks.
-    while (next_block(f, &M, &S, &nobits))
-    {
+    while (next_block(f, &M, &S, &nobits)) {
         next_hash(&M, H);
-        printf("\n");
     }
 
-    return 1;
+    return 0;
 }
 
-//Open a file, do error checking, do command line args
-int main(int argc, char *argv[])
-{
-    /* 
-        Section 5.3.4
-        For SHA-256, the initial hash value, H , shall consist of the following eight 32-bit words, in Hex 
-    */
+int main(int argc, char *argv[]) {
+    // Section 5.3.4
     WORD H[] = {
-        0X6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
         0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
-
     };
 
     // File pointer for reading.
     FILE *f;
-
     // Open file from command line for reading.
     f = fopen(argv[1], "r");
 
-    //Calculate the Sha256 of f
+    // Calculate the SHA256 of f.
     sha256(f, H);
 
-    //Print the sha256 hash.
-    for (int i = 0; i < 16; i++)
-    {
-        printf("%08" PF " ", H[i]);
-        printf("\n");
-    }
+    // Print the final SHA256 hash.
+    for (int i = 0; i < 8; i++)
+        printf("%08" PF, H[i]);
+    printf("\n");
 
     // Close the file.
     fclose(f);
+
     return 0;
 }

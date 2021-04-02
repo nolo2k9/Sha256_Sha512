@@ -1,6 +1,7 @@
 # Theory_of_algorithms_project_2021
 
 # References
+
 # Secure hash standard:
 https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
@@ -18,6 +19,12 @@ https://stackoverflow.com/questions/9606455/how-to-specify-64-bit-integers-in-c
 
 # Multi-line editing vscode
 https://kencenerelli.wordpress.com/2018/03/25/visual-studio-code-multi-line-and-multi-cursor-editing/
+
+# Writing endian independent code
+https://developer.ibm.com/technologies/systems/articles/au-endianc/
+
+# Byteswap
+https://stackoverflow.com/questions/41770887/cross-platform-definition-of-byteswap-uint64-and-byteswap-ulong
 
 
 

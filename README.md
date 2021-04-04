@@ -26,6 +26,9 @@ https://developer.ibm.com/technologies/systems/articles/au-endianc/
 # Byteswap
 https://stackoverflow.com/questions/41770887/cross-platform-definition-of-byteswap-uint64-and-byteswap-ulong
 
+# Unsigned 128 
+https://stackoverflow.com/questions/16088282/is-there-a-128-bit-integer-in-gcc
+
 
 
 # Theory of Algorithms 2021 Workings

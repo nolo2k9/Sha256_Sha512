@@ -30,7 +30,7 @@ union Block
     // 16 * 64 = 1024- dealing with block as words
     WORD words[64];
     // 64 * 16 = 1024 - dealing with the last 128 bits of the last block.
-    u_int64_t sixf[16];
+    unsigned __int128 sixf[16];
 };
 
 // For keeping track of where we are with the input message/padding.
@@ -43,7 +43,7 @@ enum Status
 
 // Returns 1 if it created a new block - either original message or padding.
 // Returns 0 if all padded message has already been consumed
-int next_block(FILE *f, union Block *B, enum Status *S, uint64_t *nobits)
+int next_block(FILE *f, union Block *B, enum Status *S, unsigned __int128 *nobits)
 {
     //Unsigned long(Number of bytes read)
     size_t nobytes;

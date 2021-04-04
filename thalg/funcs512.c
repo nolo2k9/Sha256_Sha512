@@ -22,10 +22,10 @@ In-line function will replace x,y,z with speciefied operators
 #define MAJ(x, y, z) (x & y) ^ (x & z) ^ (y & z)
 
 //Page 10 of the secure hash standard
-#define SIG0(x) ROTR(x, 28) ^ ROTR(x, 34) ^ ROTR(x, 39)
-#define SIG1(x) ROTR(x, 14) ^ ROTR(x, 18) ^ ROTR(x, 41)
-#define Sig0(x) ROTR(x, 1) ^ ROTR(x, 8) ^ SHR(x, 7)
-#define Sig1(x) ROTR(x, 19) ^ ROTR(x, 61) ^ SHR(x, 6)
+#define SIG0(_x) (ROTR(_x, 28) ^ ROTR(_x, 34) ^ ROTR(_x, 39))
+#define SIG1(_x) (ROTR(_x, 14) ^ ROTR(_x, 18) ^ ROTR(_x, 41))
+#define Sig0(_x) (ROTR(_x, 1)  ^ ROTR(_x, 8)   ^ SHR(_x, 7))
+#define Sig1(_x) (ROTR(_x, 19) ^ ROTR(_x, 61) ^ SHR(_x, 6))
 
 /*
 Section 4.2.3 of secure hash standard
@@ -75,6 +75,7 @@ WORD H[] = {
 0x510e527fade682d1,0x9b05688c2b3e6c1f,0x1f83d9abfb41bd6b,0x5be0cd19137e2179
 
 };
+
 
 
 int main(int argc, char *argv[])

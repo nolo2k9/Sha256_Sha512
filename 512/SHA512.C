@@ -303,21 +303,46 @@ int main(int argc, char *argv[])
 
     };
 
-    // File pointer for reading.
-    FILE *f;
-    // Open file from command line for reading.
-    f = fopen(argv[1], "r");
+    if (argc != 2) /* argc should be 2 for correct execution */
+    {
+        /* We print argv[0] assuming it is the program name */
+        printf("usage: %s filename", argv[0]);
+    }
+    else
+    {
+        // File pointer for reading.
+        FILE *file = fopen(argv[1], "r");
 
-    // Calculate the SHA256 of f.
-    sha512(f, H);
+        /* fopen returns 0, the NULL pointer, on failure */
+        if (file == 0)
+        {
+            printf("Could not open file\n");
+        }
+        else
+        {
+            int x;
+            /* read one character at a time from file, stopping at EOF, which
+               indicates the end of the file.  Note that the idiom of "assign
+               to a variable, check the value" used below works because
+               the assignment statement evaluates to the value assigned. */
+            printf("Contents of file: \n");
+            while ((x = fgetc(file)) != EOF)
+            {   
+                printf("%c", x);
+            }
+            printf("\n");
+            printf("Sha 512 Digest of this file: ");
+            printf("\n");
+            // Calculate the SHA256 of f.
+            sha512(file, H);
 
-    // Print the final SHA512 hash.
-    for (int i = 0; i < 8; i++)
-        printf("%016" PF, H[i]);
-    printf("\n");
-
-    // Close the file.
-    fclose(f);
+            // Print the final SHA512 hash.
+            for (int i = 0; i < 8; i++)
+                printf("%016" PF, H[i]);
+            printf("\n");
+            fclose(file);
+        }
+    }
 
     return 0;
 }

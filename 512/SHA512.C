@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
                indicates the end of the file.  Note that the idiom of "assign
                to a variable, check the value" used below works because
                the assignment statement evaluates to the value assigned. */
-            printf("Contents of file: \n");
+            printf("Contents of file: ");
             while ((x = fgetc(file)) != EOF)
             {   
                 printf("%c", x);

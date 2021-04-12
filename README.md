@@ -1,4 +1,36 @@
-# Theory_of_algorithms_project_2021
+# SHA 512 Digest
+***
+## Keith Nolan: G00351932
+***
+## Project Goal
+- This program calculates the SHA512 value of an input file. 
+- It takes the name or path of the file as a command line argument and outputs the SHA512 digest of it.
+- This programme only runs with gcc or clang compilers
+
+***
+
+## This repository contains
+- README.md - Describes the project and how you can set it up.
+- Files Containing the preprocessing of Sha512
+- The numerous functions used execute the Sha512 hashing algorithm
+- A file containing the Sha512 implementation, incorporates all of the building blocks. 
+- Make File
+***
+## How to run this project
+
+### Installing necessities
+#### Windows
+- Install **Windows** subsystem for linux. Available at: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+***
+- Download this repository from **Github**.
+- Move to the project directory
+- Move into 512 directory
+- Make the file: make SHA512
+- Run the following: ./Sha512 name or path of the file you want to digest
+- Enjoy
+***
+# About Sha512
+
 
 # References
 

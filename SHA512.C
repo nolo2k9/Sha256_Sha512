@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+#include <stdio.h>
+#include <inttypes.h>
+
 #ifdef _MSC_VER
 
 #include <stdlib.h>
@@ -50,32 +53,23 @@
 const int _i = 1;
 #define islilend() ((*(char *)&_i) != 0)
 
-#define WORD unsigned __int128
+#define WORD uint64_t
 #define PF PRIX64
-#define BYTE uint16_t
+#define BYTE uint8_t
 
 // Page 5 of the secure hash standard.
-#define ROTL(_x,_n) ((_x << _n) | (_x >> ((sizeof(_x)*16) - _n)))
-#define ROTR(_x,_n) ((_x >> _n) | (_x << ((sizeof(_x)*16) - _n)))
-#define SHR(_x,_n) (_x >> _n)
+#define ROTL(_x, _n) ((_x << _n) | (_x >> ((sizeof(_x) * 8) - _n)))
+#define ROTR(_x, _n) ((_x >> _n) | (_x << ((sizeof(_x) * 8) - _n)))
+#define SHR(_x, _n) (_x >> _n)
 
-
-/* 
-Page 5 and 11 of the secure hash standard.
-Pre processor directive.
-In-line function will replace _x,_y,_z with speciefied operators
-*/
-// X chooses bits from _y an _z depending on whether bits are 0 or 1 in _x.
+// Page 10 of the secure hash standard.
 #define CH(_x, _y, _z) ((_x & _y) ^ (~_x & _z))
-//Looks for what is the majorit_y of bits between _z,_y,_z
 #define MAJ(_x, _y, _z) ((_x & _y) ^ (_x & _z) ^ (_y & _z))
-
-
 
 //Page 10 of the secure hash standard
 #define SIG0(_x) (ROTR(_x, 28) ^ ROTR(_x, 34) ^ ROTR(_x, 39))
 #define SIG1(_x) (ROTR(_x, 14) ^ ROTR(_x, 18) ^ ROTR(_x, 41))
-#define Sig0(_x) (ROTR(_x, 1)  ^ ROTR(_x, 8)   ^ SHR(_x, 7))
+#define Sig0(_x) (ROTR(_x, 1) ^ ROTR(_x, 8) ^ SHR(_x, 7))
 #define Sig1(_x) (ROTR(_x, 19) ^ ROTR(_x, 61) ^ SHR(_x, 6))
 
 /*
@@ -86,14 +80,13 @@ Sha512 works on blocks of 1024 bits
 */
 union Block
 {
-    // 8 * 128 = 1024- dealing with block as b_ytes
+    // 8 * 128 = 1024- dealing with block as bytes
     BYTE bytes[128];
     // 16 * 64 = 1024- dealing with block as words
-    WORD words[64];
+    WORD words[32];
     // 64 * 16 = 1024 - dealing with the last 128 bits of the last block.
-    unsigned __int128 sixf[16];
+    uint64_t sixf[16];
 };
-
 
 // For keeping track of where we are with the input message/padding.
 enum Status
@@ -140,20 +133,9 @@ const WORD K[] = {
     0x431d67c49c100d4c, 0x4cc5d4becb3e42b6, 0x597f299cfc657e2a,
     0x5fcb6fab3ad6faec, 0x6c44198c4a475817};
 
-/* 
-Section, 5.3.5 of the secure has standaard
-For SHA-512, the initial hash value, H , shall consist of the following eight 64-bit words, in
-hex:
-*/
-WORD H[] = {
-    0x6a09e667f3bcc908, 0xbb67ae8584caa73b, 0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
-    0x510e527fade682d1, 0x9b05688c2b3e6c1f, 0x1f83d9abfb41bd6b, 0x5be0cd19137e2179
-
-};
-
 // Returns 1 if it created a new block - either original message or padding.
 // Returns 0 if all padded message has alread_y been consumed
-int next_block(FILE *f, union Block *M, enum Status *S, unsigned __int128 *nobits)
+int next_block(FILE *f, union Block *M, enum Status *S, uint64_t *nobits)
 {
     //Unsigned long(Number of b_ytes read)
     size_t nobytes;
@@ -163,32 +145,32 @@ int next_block(FILE *f, union Block *M, enum Status *S, unsigned __int128 *nobit
     }
     else if (*S == READ)
     {
-        //Tr_y to read 128 b_ytes from the input file.
-        nobytes = fread(M->bytes, 1, 128, f);
+        //Try to read 128 bytes from the input file.
+        nobytes = fread(M->bytes, 1, 64, f);
         //Calculate the total bits read so far.
-        *nobits = *nobits + (16 * nobytes);
+        *nobits = *nobits + (8 * nobytes);
         // Enough room for padding
         if (nobytes == 128)
         {
-            //This happens when we can read 64 more b_ytes from f
+            //This happens when we can read 64 more bytes from f
             return 1;
         }
-        else if (nobytes <= 121)
+        else if (nobytes < 120)
         {
             // This happens when we have enough room for all the padding.
-            // Append a 1 bit (and 7 0 bits to make a full b_yte)
+            // Append a 1 bit (and 7 0 bits to make a full byte)
             M->bytes[nobytes++] = 0x80; //In bits 10000000
 
             // Append enough 0 bits, leaving 64 at the end.
-            while (nobytes++ < 122)
+            while (nobytes++ < 120)
             {
                 M->bytes[nobytes] = 0x00; //In bits: 00000000
             }
 
-            // Append length of original input(CHECK ENDIANS).
-            M->sixf[7] = *nobits;
+            // Append nobits as a big endian integer.
+            M->sixf[15] = (islilend() ? bswap_64(*nobits) : *nobits);
 
-            // Sa_y this is the last block.
+            // Say this is the last block.
             *S = END;
         }
         else
@@ -199,27 +181,34 @@ int next_block(FILE *f, union Block *M, enum Status *S, unsigned __int128 *nobit
                 Appened a 1 bit and 7 0 bits to make a full b_yte
             */
             M->bytes[nobytes] = 0x80;
-            //Appened 0 bits.
-            while (nobytes++ < 64)
+            // Append 0 bits.
+            for (nobytes++; nobytes < 128; nobytes++)
             {
-                M->bytes[nobytes] = 0x00; //In bits: 00000000
+                // Error: trying to write to
+                M->bytes[nobytes] = 0x00; // In bits: 00000000
             }
-            //Change the status to END.
-            *S = END;
-        }
-    } else if (*S == PAD)
-    {
-        nobytes =0;
-        //Appened 0 bits.
-            while (nobytes++ < 122)
-            {
-                M->bytes[nobytes] = 0x00; //In bits: 00000000
-            }
-            //Append nobits as an integer
-            M->sixf[7] = *nobits;
-            //Change the status to PAD.
+            // Change the status to PAD.
             *S = PAD;
+        }
     }
+    else if (*S == PAD)
+    {
+
+        // Append 0 bits.
+        for (nobytes++; nobytes < 128; nobytes++)
+        {
+            // Error: trying to write to
+            M->bytes[nobytes] = 0x00; // In bits: 00000000
+        }
+
+        // Append nobits as a big endian integer.
+        M->sixf[15] = (islilend() ? bswap_64(*nobits) : *nobits);
+        *S = PAD;
+    }
+    // Swap the byte order of the words if we're little endian.
+    if (islilend())
+        for (int i = 0; i < 16; i++)
+            M->words[i] = bswap_64(M->words[i]);
 
     return 1;
 }
@@ -228,7 +217,7 @@ int next_hash(union Block *M, WORD H[])
 {
 
     // Message schedule, Section 6.4.2
-    WORD W[128];
+    WORD W[80];
     // Iterator.
     int t;
     // Temporar_y variables.
@@ -237,7 +226,7 @@ int next_hash(union Block *M, WORD H[])
     // Section 6.4.2, part 1.
     for (t = 0; t < 16; t++)
         W[t] = M->words[t];
-    for (t = 16; t < 79; t++)
+    for (t = 16; t < 80; t++)
         W[t] = Sig1(W[t - 2]) + W[t - 7] + Sig0(W[t - 15]) + W[t - 16];
 
     // Section 6.4.2, part 2.
@@ -280,13 +269,12 @@ int next_hash(union Block *M, WORD H[])
 // The function that performs/orchestrates the SHA256 algorithm on message f.
 int sha512(FILE *f, WORD H[])
 {
-    
 
     // The current block.
     union Block M;
 
     // Total number of bits read.
-    unsigned __int128 nobits = 0;
+    uint64_t nobits = 0;
 
     // Current status of reading input.
     enum Status S = READ;
@@ -308,8 +296,10 @@ int main(int argc, char *argv[])
     hex:
     */
     WORD H[] = {
-        0x6a09e667f3bcc908, 0xbb67ae8584caa73b, 0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
-        0x510e527fade682d1, 0x9b05688c2b3e6c1f, 0x1f83d9abfb41bd6b, 0x5be0cd19137e2179
+        0x6a09e667f3bcc908, 0xbb67ae8584caa73b,
+        0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
+        0x510e527fade682d1, 0x9b05688c2b3e6c1f,
+        0x1f83d9abfb41bd6b, 0x5be0cd19137e2179
 
     };
 
@@ -323,7 +313,7 @@ int main(int argc, char *argv[])
 
     // Print the final SHA512 hash.
     for (int i = 0; i < 8; i++)
-        printf("%08" PF, H[i]);
+        printf("%016" PF, H[i]);
     printf("\n");
 
     // Close the file.

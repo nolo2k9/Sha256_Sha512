@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include <stdio.h>
-#include <inttypes.h>
-
 #ifdef _MSC_VER
 
 #include <stdlib.h>
@@ -83,7 +80,7 @@ union Block
     // 8 * 128 = 1024- dealing with block as bytes
     BYTE bytes[128];
     // 16 * 64 = 1024- dealing with block as words
-    WORD words[32];
+    WORD words[64];
     // 64 * 16 = 1024 - dealing with the last 128 bits of the last block.
     uint64_t sixf[16];
 };
@@ -146,23 +143,23 @@ int next_block(FILE *f, union Block *M, enum Status *S, uint64_t *nobits)
     else if (*S == READ)
     {
         //Try to read 128 bytes from the input file.
-        nobytes = fread(M->bytes, 1, 64, f);
+        nobytes = fread(M->bytes, 1, 128, f);
         //Calculate the total bits read so far.
         *nobits = *nobits + (8 * nobytes);
         // Enough room for padding
         if (nobytes == 128)
         {
             //This happens when we can read 64 more bytes from f
-            return 1;
+            //return 1;
         }
         else if (nobytes < 120)
         {
             // This happens when we have enough room for all the padding.
             // Append a 1 bit (and 7 0 bits to make a full byte)
-            M->bytes[nobytes++] = 0x80; //In bits 10000000
+            M->bytes[nobytes] = 0x80; //In bits 10000000
 
             // Append enough 0 bits, leaving 64 at the end.
-            while (nobytes++ < 120)
+           for (nobytes++; nobytes < 120; nobytes++)
             {
                 M->bytes[nobytes] = 0x00; //In bits: 00000000
             }
@@ -195,7 +192,7 @@ int next_block(FILE *f, union Block *M, enum Status *S, uint64_t *nobits)
     {
 
         // Append 0 bits.
-        for (nobytes++; nobytes < 128; nobytes++)
+        for (nobytes++; nobytes < 120; nobytes++)
         {
             // Error: trying to write to
             M->bytes[nobytes] = 0x00; // In bits: 00000000
@@ -326,10 +323,7 @@ int main(int argc, char *argv[])
                to a variable, check the value" used below works because
                the assignment statement evaluates to the value assigned. */
             printf("Contents of file: ");
-            while ((x = fgetc(file)) != EOF)
-            {   
-                printf("%c", x);
-            }
+            
             printf("\n");
             printf("Sha 512 Digest of this file: ");
             printf("\n");

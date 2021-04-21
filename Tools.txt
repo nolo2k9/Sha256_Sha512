@@ -1,6 +1,0 @@
-man 3 fopen || man 3 function name
-
-gcc -o emptyexec preproc.c
-
-make bit-operations
-./bit-operations

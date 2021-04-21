@@ -99,6 +99,7 @@ Proof-of-work is how the network reaches this consensus[2,12]. Network participa
 Each block in the blockchain is unique and values must be generated for each block[2]. A hash for a block is generated from the data that applies to each block. This includes the timestamp, the transaction data that is unique to that block and the hash value of the previous block (last hash)[2]. Each block references the hash of the previous block. This is stored in the subsequent block as the last_hash. Meaning each block reinforces the one after it. If one hash has been changed it will poison all the subsequent blocks. The first block in a blockchian is called the genesis block. This Block is hardcoded with data as there is nothing before it. 
 This is very useful when trying to ensure if a particular block is clean. If the block hash returned is different from the one that has been presented, this tells us straight away that the blocks data has been tampered with. 
 ![Blocks in a blockchain](./Images/blocks.png)\
+<b>Blockchain blocks</b>
 ![Blocks in a blockchain](./Images/blockchainNetwork.png)
 
 

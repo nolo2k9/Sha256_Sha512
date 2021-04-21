@@ -57,7 +57,8 @@ SHA512 processes each block of 1024 bits from the inputted message, it does this
 
 The result from each block is stored in a hash buffer, this also holds the final digest of the whole process. 
 ![Processing Sha512](./Images/padding.png)
-Sha512 processing
+&nbsp;
+&nbsp;
 <b>Sha512 Padding</b>
 
 #### Message processing
@@ -67,6 +68,8 @@ The next part of the algorithm consists of several <b>rounds</b> [13]. Rounds ta
 When the Round is given the 3 inputs that it needs it processes them and outputs a value of 512 bits[13]. This operation is then repeated for 80 rounds. When the 80 rounds have been finished the final output is added to the result of the previous <b>message</b>[13].
 ***
 ![Processing Sha512](./Images/processing.jpg)
+&nbsp;
+&nbsp;
 <b>Sha512 processing of a single block</b>
 ***
 #### Output

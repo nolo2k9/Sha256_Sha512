@@ -56,6 +56,9 @@ The total size value ust be represented in 128 bits, that is 128 bits sort of a 
 SHA512 processes each block of 1024 bits from the inputted message, it does this using the result from the previous block. For the first block of 1024 bits a default value is used to start this process. 
 
 The result from each block is stored in a hash buffer, this also holds the final digest of the whole process. 
+![Processing Sha512](./Images/padding.png)
+Sha512 processing
+<b>Sha512 Padding</b>
 
 #### Message processing
 As established above message processing takes place by taking eah block of 1024 bits and the previous processing result. Each message block is expanded into 80 words, with each having a size of 64 bits [13].
@@ -64,6 +67,8 @@ The next part of the algorithm consists of several <b>rounds</b> [13]. Rounds ta
 When the Round is given the 3 inputs that it needs it processes them and outputs a value of 512 bits[13]. This operation is then repeated for 80 rounds. When the 80 rounds have been finished the final output is added to the result of the previous <b>message</b>[13].
 ***
 ![Processing Sha512](./Images/processing.jpg)
+<b>Sha512 processing of a single block</b>
+***
 #### Output
 When each block completes messaage processing the final 512 Hash digest is outputted.[13]
 

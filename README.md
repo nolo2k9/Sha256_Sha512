@@ -55,11 +55,13 @@ The total size value ust be represented in 128 bits, that is 128 bits sort of a 
 
 SHA512 processes each block of 1024 bits from the inputted message, it does this using the result from the previous block. For the first block of 1024 bits a default value is used to start this process. 
 
-The result from each block is stored in a hash buffer, this also holds the final digest of the whole process. 
+The result from each block is stored in a hash buffer, this also holds the final digest of the whole process. \
+***
 ![Processing Sha512](./Images/padding.png)\
 &nbsp;
 &nbsp;
 <b>Sha512 Padding</b>
+***
 
 #### Message processing
 As established above message processing takes place by taking eah block of 1024 bits and the previous processing result. Each message block is expanded into 80 words, with each having a size of 64 bits [13].
@@ -72,9 +74,9 @@ When the Round is given the 3 inputs that it needs it processes them and outputs
 &nbsp;
 <b>Sha512 processing of a single block</b>
 ***
-#### Output
-When each block completes messaage processing the final 512 Hash digest is outputted.[13]
 
+#### Output
+When each block completes messaage processing the final 512 Hash digest is outputted [13].
 
 
 #### Real world use cases for SHA2
@@ -97,11 +99,11 @@ Proof-of-work is how the network reaches this consensus[2,12]. Network participa
 
 #### SHA256
 Each block in the blockchain is unique and values must be generated for each block[2]. A hash for a block is generated from the data that applies to each block. This includes the timestamp, the transaction data that is unique to that block and the hash value of the previous block (last hash)[2]. Each block references the hash of the previous block. This is stored in the subsequent block as the last_hash. Meaning each block reinforces the one after it. If one hash has been changed it will poison all the subsequent blocks. The first block in a blockchian is called the genesis block. This Block is hardcoded with data as there is nothing before it. 
-This is very useful when trying to ensure if a particular block is clean. If the block hash returned is different from the one that has been presented, this tells us straight away that the blocks data has been tampered with. 
+This is very useful when trying to ensure if a particular block is clean. If the block hash returned is different from the one that has been presented, this tells us straight away that the blocks data has been tampered with.\
+*** 
 ![Blocks in a blockchain](./Images/blocks.png)\
-<b>Blockchain blocks</b>
-
-
+<b>Blockchain blocks</b>\
+***
 
 
 

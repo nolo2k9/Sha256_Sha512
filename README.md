@@ -116,7 +116,37 @@ In a world where our data privacy is constantly in question, people always need 
 An important feature of the Sha-512 and Sha-2 family alike is that if data has tampered with it guarantees that the data is no longer valid. This is extremely powerful. Sha is still being used in modern-day applications and still is being, which shows that it has stood the test of time. 
 
 ## Why can't we reverse the SHA512 algorithm to retrieve the original message from a hash digest?
-Hash functions provide encryption using an algorithm and unlinke 
+Hash functions encrypt data using algorithms such as Sha. Unlike other encryption algorithms such as asymmetric they don’t have a key. As stated above hashing algorithms are “one way hash functions” this is because there is no way to reverse the encryption. A variable length plaintext message is hashed into a fixed-length hash value or message digest. After the plain text has been hashed if the hash on the plaintext gets tampered with or changed, the actual plain text gets changed. This ensures integrity. 
+
+SHA stands for secure hashing algorithm. The word secure is used as it is difficult to reverse and it is very difficult to find two given inputs which give the same output. 
+
+Complexity of SHA-512
+As we know a SHA function takes in a variable length input. It then 
+-	Pads the message. Sometimes an extra block is needed, always a fixed amount of work. 
+-	Breaks it into blocks. The number of blocks is \frac{n + pad}{1024}. 
+-	Each block is then processed. This is always a fixed number of operations. Doesn’t depend on n.
+
+In other words the complexity is of the order of n.
+
+Complexity of inverse 
+To start with there is no inverse of SHA-512. For this to be an inverse there would have to be one output for any given input. The inverse of the Sha-512 algorithm has multiple potential outputs for some input. 
+
+To bring the hashed value back to the original text. The strings are restricted to 2<sup>128</sup>. The contained strings go from strings of length 0 all the way to strings of the power of 2<sup>1281</sup>.
+This means that the complexity would be (2<sup>0</sup> + 2<sup>-1</sup> .. + 2<sup>128-1</sup> -1) * N
+For this reason the secure hash algorithm can never be broken as there are to many possible values for an attacker to discover in a reasonable amount of time. It can even be said that an attacker could get luckier by guessing the password than actually trying to reverse this algorithm. 
+
+## Can you design an algorithm that, given enough time, will find input messages that give each of the possible 512-bit strings?
+
+## How difficult is it to find a hash digest beginning with at least twelve zeros?
+To answer this question I will use the Bitcoin example. Each block in a blockchain needs to be mined by miners in order for it to become a valid block in the chain [2]. When mining a block the miner needs to find the hash of the block. When mining blocks there is always a difficulty, this is how difficult it is to mine that particular block or in other words how much computing power will be needed to mine that block. The difficulty is a set value and will go up and down depending on the average block mining rate. In order to solve the hash for the block, a leading number of zero's must be in front of it. This is the difficulty. 
+The more zeros that are needed at the beginning of the target hash the more difficult it is to solve the hash for that block. 
+
+A bitcoin hash is made up of 64 hexadecimal characters or 16<sup>64</sup>
+If you were trying to guess this value then you would need to guess 16<sup>8</sup> times before you could find the correct value. 
+
+Since the minimum difficulty is one that requires 8 zero hexadecimal characters at the start of the hash. 
+The probability of a hash being valid is proportional to the difficulty
+. The constant being (2<sup>16-1</sup>)/ (12 * 2<sup>48</sup>) so that is the probability of a hash being valid. 
 
 ### Theory of Algorithms 2021 Workings
 
@@ -196,4 +226,9 @@ Hash functions provide encryption using an algorithm and unlinke
 ##### Equidistributed sequence
 [16] https://en.wikipedia.org/wiki/Equidistributed_sequence
 
+#### Fractions in markdown
+[17] https://rmd4sci.njtierney.com/math
+
+#### bitcoin core
+[18] http://www.cryptoswise.com bitcoin-core-how-difficult-is-it-to-find-a-hash-digest-beginning-with-at-least-twelve-zeros/
 ***

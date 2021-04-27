@@ -16,12 +16,14 @@
 - A file containing the Sha512 implementation, incorporates all of the building blocks. 
 - Make File
 ***
-## How to run this project
+## How to use this project
 
 ### Installing necessities
 #### Windows
 - Install **Windows** subsystem for linux. Available at: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+
 ***
+## How to run this project
 - Download this repository from **Github**.
 - Move to the project directory
 - Move into 512 directory
@@ -30,13 +32,12 @@
 - Enjoy
 ***
 
-### About SHA 512
+### About SHA512
 SHA stands for "Secure Hashing Algorithm". 
 These algorithms are used for hashing data and files. Hashing algoritms are implemented in multiple computing fields such as, internet security digital certificates and blockchain. 
 The idea behind these algorithms is that when data has been passed into a SHA function a unique hash is outputted. Changing any one of these values will result in a completely different hash being outputted. 
 
-Sha algorithms are one-way functions. This means that you cannot decrypt the data by just looking at it. The only possible way to crack an encrypted Sha output would be by guessing and checking. This method is extremely costly in terms of computational power and could take a very long time to crack.
-
+Sha algorithms are one-way functions. This means that you cannot decrypt the data by just looking at it. The only possible way to crack an encrypted Sha output would be by guessing and checking which is computationally expensive and may take a very long time to finish if ever. 
 #### Hashing functions
 Hash functions take in data as input and output a hash digest. This digest is of a fixed length.
 There is a limit to the size of the message that can be hashed. 
@@ -67,7 +68,7 @@ The result from each block is stored in a hash buffer, this also holds the final
 As established above message processing takes place by taking eah block of 1024 bits and the previous processing result. Each message block is expanded into 80 words, with each having a size of 64 bits [13].
 The next part of the algorithm consists of several <b>rounds</b> [13]. Rounds take a word, the output of the previous round and a constant in this case a 512 constant. Similar to processes the first round has no previous round to input. In this case it uses the the final output from the previous message processing[13].
 
-When the Round is given the 3 inputs that it needs it processes them and outputs a value of 512 bits[13]. This operation is then repeated for 80 rounds. When the 80 rounds have been finished the final output is added to the result of the previous <b>message</b>[13].
+When the Round is given the 3 inputs that it needs it processes them and outputs a value of 512 bits[13] and is then repeated for 80 rounds[13]. When the 80 rounds have been finished the final output is added to the result of the previous <b>message</b>[13].
 ***
 ![Processing Sha512](./Images/processing.jpg)\
 &nbsp;
@@ -105,7 +106,17 @@ This is very useful when trying to ensure if a particular block is clean. If the
 <b>Blockchain blocks</b>\
 ***
 
+## Attacks on SHA
 
+The SHA-2 algorithm has very few attacks that will work against it. With that being said one of the most common is a reduced round preimage attack [14]. This attack works if the output is equidistributed [16]. If it is then the probability of any hash starting with 0x12345678 for example is 2<sup>-32</sup>. This would mean the expected number of hashes an attacker would need to perform is 2<sup>32</sup>, which is achievable[15]. But like all attacks on Sha, none of them is completely successful
+
+## Why is SHA-512 important
+In a world where our data privacy is constantly in question, people always need ways to ensure that data of whatever kind hasn't been tampered with. One use for the Sha-2 family as mentioned above is ensuring the integrity of data in a system such as a Blockchain. 
+
+An important feature of the Sha-512 and Sha-2 family alike is that if data has tampered with it guarantees that the data is no longer valid. This is extremely powerful. Sha is still being used in modern-day applications and still is being, which shows that it has stood the test of time. 
+
+## Why can't we reverse the SHA512 algorithm to retrieve the original message from a hash digest?
+Hash functions provide encryption using an algorithm and unlinke 
 
 ### Theory of Algorithms 2021 Workings
 
@@ -131,7 +142,10 @@ This is very useful when trying to ensure if a particular block is clean. If the
 |Decimal | Hex |   Binary |
 |--------|-----|----------|
 |    241 |  F1 | 11110001 |
-|    170 |  AA | 10101010 |
+|    170 |  AA | 10101010 |\
+***
+
+
 ### References
 
 ##### Secure hash standard:
@@ -169,5 +183,17 @@ This is very useful when trying to ensure if a particular block is clean. If the
 
 ##### Evaluating Proof- of-Work Consensus Protocols
 [12]  R.Zhang, B.Preneel” Lay Down the Common Metrics: Evaluating Proof- of-Work Consensus Protocols’ Security” 
+
 ##### cryptography explaining sha512
 [13] https://medium.com/@zaid960928/cryptography-explaining-sha-512-ad896365a0c1
+
+##### Reasons why SHA512 is superior to MD5
+[14] https://stackoverflow.com/questions/2117732/reasons-why-sha512-is-superior-to-md5
+
+##### SHA-512 partial preimage
+[15] https://crypto.stackexchange.com/questions/25326/sha-512-partial-preimage
+
+##### Equidistributed sequence
+[16] https://en.wikipedia.org/wiki/Equidistributed_sequence
+
+***

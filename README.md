@@ -116,7 +116,13 @@ In a world where our data privacy is constantly in question, people always need 
 An important feature of the Sha-512 and Sha-2 family alike is that if data has tampered with it guarantees that the data is no longer valid. This is extremely powerful. Sha is still being used in modern-day applications and still is being, which shows that it has stood the test of time. 
 
 ## Why can't we reverse the SHA512 algorithm to retrieve the original message from a hash digest?
-Hash functions encrypt data using algorithms such as Sha. Unlike other encryption algorithms such as asymmetric they don’t have a key. As stated above hashing algorithms are “one way hash functions” this is because there is no way to reverse the encryption. A variable length plaintext message is hashed into a fixed-length hash value or message digest. After the plain text has been hashed if the hash on the plaintext gets tampered with or changed, the actual plain text gets changed. This ensures integrity. 
+Hash functions encrypt data using algorithms such as Sha. Unlike other encryption algorithms such as asymmetric they don’t have a key value pair where the receiver can decrypt the message that they have been sent. This is because the SHA algorithms are “one way hash functions”. A variable length plaintext message is hashed into a fixed-length hash value or message digest. After the plain text has been hashed if the hash on the plaintext gets tampered with or changed, the actual plain text gets changed. This ensures integrity. 
+
+It is possible for two inputs to have the same hash as SHA512 is random, when this happens it is called a hash collison. By design Sha makes collisons really difficult to find. The only real way to reverse a hash function is by brute force in a reasonabe amount of tim. In SHA512 there are 2<sum>512</sum> possible hashes
+
+
+
+## Can you design an algorithm that, given enough time, will find input messages that give each of the possible 512-bit strings?
 
 SHA stands for secure hashing algorithm. The word secure is used as it is difficult to reverse and it is very difficult to find two given inputs which give the same output. 
 
@@ -135,12 +141,11 @@ To bring the hashed value back to the original text. The strings are restricted 
 This means that the complexity would be (2<sup>0</sup> + 2<sup>-1</sup> .. + 2<sup>128-1</sup> -1) * N
 For this reason the secure hash algorithm can never be broken as there are to many possible values for an attacker to discover in a reasonable amount of time. It can even be said that an attacker could get luckier by guessing the password than actually trying to reverse this algorithm. 
 
-## Can you design an algorithm that, given enough time, will find input messages that give each of the possible 512-bit strings?
-
 ## How difficult is it to find a hash digest beginning with at least twelve zeros?
 To answer this question I will use the Bitcoin example. Each block in a blockchain needs to be mined by miners in order for it to become a valid block in the chain [2]. When mining a block the miner needs to find the hash of the block. When mining blocks there is always a difficulty, this is how difficult it is to mine that particular block or in other words how much computing power will be needed to mine that block. The difficulty is a set value and will go up and down depending on the average block mining rate. In order to solve the hash for the block, a leading number of zero's must be in front of it. This is the difficulty. 
 The more zeros that are needed at the beginning of the target hash the more difficult it is to solve the hash for that block. 
 
+Adapted from [19]
 A bitcoin hash is made up of 64 hexadecimal characters or 16<sup>64</sup>
 If you were trying to guess this value then you would need to guess 16<sup>8</sup> times before you could find the correct value. 
 
@@ -231,4 +236,6 @@ The probability of a hash being valid is proportional to the difficulty
 
 #### bitcoin core
 [18] http://www.cryptoswise.com bitcoin-core-how-difficult-is-it-to-find-a-hash-digest-beginning-with-at-least-twelve-zeros/
+#### What are the units of “difficulty"
+[19] https://bitcoin.stackexchange.com/questions/75895/what-are-the-units-of-difficulty
 ***

@@ -29,6 +29,9 @@
 - Move into 512 directory
 - Make the file: make SHA512
 - Run the following: ./Sha512 name or path of the file you want to digest
+- Run test class (While in 512 directory)
+- chmod u+x tests.sh 
+- Run ./tests.sh
 - Enjoy
 ***
 

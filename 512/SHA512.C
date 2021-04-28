@@ -51,7 +51,7 @@ const int _i = 1;
 #define islilend() ((*(char *)&_i) != 0)
 
 #define WORD uint64_t
-#define PF PRIX64
+#define PF PRIx64
 #define BYTE uint8_t
 
 // Page 5 of the secure hash standard.
@@ -322,12 +322,6 @@ int main(int argc, char *argv[])
                indicates the end of the file.  Note that the idiom of "assign
                to a variable, check the value" used below works because
                the assignment statement evaluates to the value assigned. */
-            printf("Contents of file: ");
-            
-            printf("\n");
-            printf("Sha 512 Digest of this file: ");
-            printf("\n");
-            // Calculate the SHA256 of f.
             sha512(file, H);
 
             // Print the final SHA512 hash.

@@ -30,7 +30,9 @@
 - Make the file: make SHA512
 - Run the following: ./Sha512 name or path of the file you want to digest
 - Run test class (While in 512 directory)
-- chmod u+x tests.sh 
+- chmod u+x tests.sh
+- Please note this application was written on a Macintosh the command for shasum isshasum -a 512 filename
+- This may differ on a windows os
 - Run ./tests.sh
 - Enjoy
 ***
